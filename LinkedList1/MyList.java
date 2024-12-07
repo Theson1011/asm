@@ -10,6 +10,9 @@ package LinkedList1;
  *
  * @author Giang
  */
+import java.util.ArrayList;
+import java.util.List;
+
 public class MyList {
     Node head, tail;
 
@@ -34,16 +37,16 @@ public class MyList {
     public void traverse() {
         Node p = head;
         while (p != null) {
-            p.print(); // Gọi phương thức in trong lớp Node
+            p.print(); 
             p = p.next;
         }
     }
 
-    // 1. Phương thức Edit
+    // Edit student
     public void editStudent(int id, String newName, double newMarks) {
         Node p = head;
         while (p != null) {
-            if (p.data.getId() == id) { // Tìm Node chứa học sinh có ID tương ứng
+            if (p.data.getId() == id) {
                 p.data.setName(newName);
                 p.data.setMarks(newMarks);
                 System.out.println("Student with ID " + id + " has been updated.");
@@ -54,27 +57,25 @@ public class MyList {
         System.out.println("Student with ID " + id + " not found.");
     }
 
-    // 2. Phương thức Delete
+    // Delete student
     public void deleteStudent(int id) {
         if (isEmpty()) {
             System.out.println("The list is empty.");
             return;
         }
 
-        // Xóa nếu học sinh ở đầu danh sách
         if (head.data.getId() == id) {
             head = head.next;
-            if (head == null) tail = null; // Nếu danh sách rỗng sau khi xóa
+            if (head == null) tail = null; 
             System.out.println("Student with ID " + id + " has been deleted.");
             return;
         }
 
-        // Tìm và xóa học sinh trong các Node tiếp theo
         Node p = head;
         while (p.next != null) {
             if (p.next.data.getId() == id) {
                 p.next = p.next.next;
-                if (p.next == null) tail = p; // Cập nhật tail nếu xóa phần tử cuối
+                if (p.next == null) tail = p;
                 System.out.println("Student with ID " + id + " has been deleted.");
                 return;
             }
@@ -84,25 +85,83 @@ public class MyList {
         System.out.println("Student with ID " + id + " not found.");
     }
 
-    // 3. Phương thức Sort
-    public void sortStudents() {
-        if (head == null || head.next == null) return; // Không cần sắp xếp nếu ít hơn 2 Node
+    // Selection Sort 
+    public void selectionSortByMarks() {
+        if (head == null || head.next == null) return;
 
-        // Sắp xếp nổi bọt (Bubble Sort) cho danh sách liên kết
         for (Node i = head; i != null; i = i.next) {
-            for (Node j = head; j.next != null; j = j.next) {
-                if (j.data.getMarks() < j.next.data.getMarks()) { // Sắp xếp giảm dần theo điểm số
-                    Student temp = j.data;
-                    j.data = j.next.data;
-                    j.next.data = temp;
+            Node minNode = i;
+            for (Node j = i.next; j != null; j = j.next) {
+                if (j.data.getMarks() < minNode.data.getMarks()) {
+                    minNode = j;
                 }
             }
+            if (minNode != i) {
+                Student temp = i.data;
+                i.data = minNode.data;
+                minNode.data = temp;
+            }
         }
-        System.out.println("Students sorted by marks in descending order.");
+        System.out.println("Students sorted by marks in ascending order.");
     }
 
-    // 4. Phương thức Search
-    public Student searchStudent(int id) {
+    // Merge Sort 
+    public void mergeSortById() {
+        if (head != null) {
+            head = mergeSortByIdRecursive(head);
+        }
+        System.out.println("Students sorted by ID in ascending order.");
+    }
+
+    // Helper method for Merge Sort
+    private Node mergeSortByIdRecursive(Node node) {
+        if (node == null || node.next == null) {
+            return node;
+        }
+
+        Node middle = getMiddle(node);
+        Node nextOfMiddle = middle.next;
+        middle.next = null;
+
+        Node left = mergeSortByIdRecursive(node);
+        Node right = mergeSortByIdRecursive(nextOfMiddle);
+
+        return mergeById(left, right);
+    }
+
+    // Merge two sorted lists
+    private Node mergeById(Node left, Node right) {
+        if (left == null) return right;
+        if (right == null) return left;
+
+        if (left.data.getId() <= right.data.getId()) {
+            left.next = mergeById(left.next, right);
+            return left;
+        } else {
+            right.next = mergeById(left, right.next);
+            return right;
+        }
+    }
+
+    // Get middle node for Merge Sort
+    private Node getMiddle(Node node) {
+        if (node == null) return node;
+
+        Node slow = node;
+        Node fast = node.next;
+
+        while (fast != null) {
+            fast = fast.next;
+            if (fast != null) {
+                slow = slow.next;
+                fast = fast.next;
+            }
+        }
+        return slow;
+    }
+
+    // Linear search by ID
+    public Student searchStudentById(int id) {
         Node p = head;
         while (p != null) {
             if (p.data.getId() == id) {
@@ -110,9 +169,44 @@ public class MyList {
             }
             p = p.next;
         }
-        return null; // Trả về null nếu không tìm thấy học sinh
+        return null;
+    }
+
+    // Search by Name (Linear search)
+    public Student searchStudentByName(String name) {
+        Node p = head;
+        while (p != null) {
+            if (p.data.getName().equalsIgnoreCase(name)) {
+                return p.data;
+            }
+            p = p.next;
+        }
+        return null;
+    }
+
+    // Binary search by Marks
+    public Student searchStudentByMarks(double marks) {
+        List<Student> students = new ArrayList<>();
+        Node p = head;
+        while (p != null) {
+            students.add(p.data);
+            p = p.next;
+        }
+        students.sort((s1, s2) -> Double.compare(s1.getMarks(), s2.getMarks()));
+
+        int left = 0, right = students.size() - 1;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (students.get(mid).getMarks() == marks) {
+                return students.get(mid);
+            } else if (students.get(mid).getMarks() < marks) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return null;
     }
 }
-
 
 

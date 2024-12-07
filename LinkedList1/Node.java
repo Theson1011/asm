@@ -20,6 +20,6 @@ public class Node {
     }
 
     public void print() {
-        System.out.println(data); // In thông tin học sinh
+        System.out.println(data);
     }
 }

@@ -43,7 +43,7 @@ public class Student {
         this.name = name;
         this.Marks = Marks;
     }
-    // Phương thức tính toán rank dựa trên marks
+  
     public String getRank() {
         if (Marks < 5.0) {
             return "Fail";

@@ -5,33 +5,35 @@
 package com.mycompany.node;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /**
- * Lớp MyStack quản lý danh sách sinh viên dưới dạng ngăn xếp (stack).
+ * The MyStack class manages a list of students in the form of a stack.
  * 
  * @author ADMIN
  */
 public class MyStack {
     private Node top;
 
-    // Constructor để khởi tạo ngăn xếp rỗng
+    // Constructor to initialize an empty stack
     public MyStack() {
         this.top = null;
     }
 
-    // Kiểm tra ngăn xếp rỗng
+    // Check if the stack is empty
     public boolean isEmpty() {
         return top == null;
     }
 
-    // Thêm một phần tử vào ngăn xếp
+    // Push a new element onto the stack
     public void push(Student student) {
         Node newNode = new Node(student);
         newNode.next = top;
-        top = newNode;
+        top = newNode; 
     }
 
-    // Xóa phần tử đầu tiên khỏi ngăn xếp
+    // Pop the top element from the stack
     public Student pop() {
         if (isEmpty()) {
             System.out.println("Stack is empty.");
@@ -43,7 +45,7 @@ public class MyStack {
         }
     }
 
-    // Xem phần tử đầu tiên của ngăn xếp
+    // Peek at the top element of the stack
     public Student peek() {
         if (isEmpty()) {
             System.out.println("Stack is empty.");
@@ -53,7 +55,7 @@ public class MyStack {
         }
     }
 
-    // Hiển thị toàn bộ sinh viên trong ngăn xếp
+    // Display all students in the stack
     public void display() {
         if (isEmpty()) {
             System.out.println("Stack is empty.");
@@ -66,7 +68,7 @@ public class MyStack {
         }
     }
 
-    // Sửa thông tin sinh viên theo ID
+    // Edit student information by ID
     public void editStudent(String id, String newName, double newMarks) {
         Node current = top;
         while (current != null) {
@@ -81,42 +83,74 @@ public class MyStack {
         System.out.println("Student with ID " + id + " not found.");
     }
 
-    // Tìm kiếm sinh viên theo ID
-    // Tìm kiếm sinh viên theo ID và trả về đối tượng Student
+    // Search for a student by ID and return the Student object
     public Student searchStudentById(String id) {
+        Node current = top; // Start from the top of the stack
+
+        while (current != null) { // Traverse through the stack
+            if (current.data.getId().equalsIgnoreCase(id)) {
+                return current.data;
+            }
+            current = current.next; // Move to the next node
+        }
+
+        // If no match is found, return null
+        System.out.println("No student found with ID: " + id);
+        return null;
+    }
+
+    // Search for students by marks (Binary Search and display all matching students)
+    public void binarySearchByMarks(double marks) {
+        List<Student> students = new ArrayList<>();
         Node current = top;
 
+        // Add all students to a temporary list
         while (current != null) {
-            if (current.data.getId().equalsIgnoreCase(id)) {
-                return current.data; // Trả về sinh viên nếu tìm thấy
-            }
+            students.add(current.data);
             current = current.next;
         }
 
-        System.out.println("No student found with ID: " + id);
-        return null; // Trả về null nếu không tìm thấy
-    }
+        // Sort the list for binary search
+        students.sort(Comparator.comparingDouble(Student::getMarks));
 
-    
-    // Tìm kiếm sinh viên theo điểm
-    public void searchStudentByMarks(double marks) {
+        // Perform binary search
+        int left = 0, right = students.size() - 1;
         boolean found = false;
-        Node current = top;
 
-        while (current != null) {
-            if (current.data.getMarks() == marks) {
-                System.out.println("Student found: " + current.data);
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            double midMarks = students.get(mid).getMarks();
+
+            if (midMarks == marks) {
                 found = true;
+                System.out.println("Found students with marks " + marks + ":");
+
+                // Display all students with the specified marks
+                int i = mid;
+                while (i >= 0 && students.get(i).getMarks() == marks) { // Search left
+                    System.out.println(students.get(i));
+                    i--;
+                }
+
+                i = mid + 1;
+                while (i < students.size() && students.get(i).getMarks() == marks) { // Search right
+                    System.out.println(students.get(i));
+                    i++;
+                }
+                break;
+            } else if (midMarks < marks) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
             }
-            current = current.next;
         }
 
         if (!found) {
-            System.out.println("No student found with marks: " + marks);
+            System.out.println("No students found with marks: " + marks);
         }
     }
 
-    // Tìm kiếm sinh viên theo tên
+    // Search for students by name
     public void searchStudentByName(String name) {
         boolean found = false;
         Node current = top;
@@ -131,18 +165,15 @@ public class MyStack {
             System.out.println("No student found with the name: " + name);
         }
     }
-    
-    
-    
 
-    // Xóa sinh viên theo ID
+    // Delete a student by ID
     public void deleteStudent(String id) {
         if (isEmpty()) {
             System.out.println("Stack is empty.");
             return;
         }
 
-        // Nếu phần tử cần xóa là phần tử đầu tiên
+        // If the first element needs to be deleted
         if (top.data.getId().equals(id)) {
             top = top.next;
             System.out.println("Student with ID " + id + " has been deleted.");
@@ -161,17 +192,17 @@ public class MyStack {
         System.out.println("Student with ID " + id + " not found.");
     }
 
-    // Sắp xếp ngăn xếp theo ID (Bubble Sort)
+    // Sort the stack by ID (Bubble Sort)
     public void sortStackById() {
         if (isEmpty()) return;
 
-        // Chuyển stack sang danh sách để dễ sắp xếp
+        // Move stack to a list for sorting
         ArrayList<Student> list = new ArrayList<>();
         while (!isEmpty()) {
             list.add(pop());
         }
 
-        // Sắp xếp danh sách bằng Bubble Sort dựa trên ID
+        // Sort the list using Bubble Sort based on ID
         for (int i = 0; i < list.size() - 1; i++) {
             for (int j = 0; j < list.size() - i - 1; j++) {
                 if (list.get(j).getId().compareTo(list.get(j + 1).getId()) > 0) {
@@ -182,32 +213,32 @@ public class MyStack {
             }
         }
 
-        // Đẩy các phần tử đã sắp xếp lại vào stack
+        // Push the sorted elements back into the stack
         for (int i = list.size() - 1; i >= 0; i--) {
             push(list.get(i));
         }
     }
 
-    // Sắp xếp ngăn xếp theo điểm (Quick Sort)
+    // Sort the stack by marks (Quick Sort)
     public void sortStackByMarks() {
         if (isEmpty()) return;
 
-        // Chuyển stack sang danh sách để dễ sắp xếp
+        // Move stack to a list for sorting
         ArrayList<Student> list = new ArrayList<>();
         while (!isEmpty()) {
             list.add(pop());
         }
 
-        // Sắp xếp danh sách bằng Quick Sort dựa trên điểm
+        // Sort the list using Quick Sort based on marks
         quickSortByMarks(list, 0, list.size() - 1);
 
-        // Đẩy các phần tử đã sắp xếp lại vào stack
+        // Push the sorted elements back into the stack
         for (int i = list.size() - 1; i >= 0; i--) {
             push(list.get(i));
         }
     }
 
-    // Quick Sort Helper Method
+    // Helper method for Quick Sort
     private void quickSortByMarks(ArrayList<Student> list, int low, int high) {
         if (low < high) {
             int pivotIndex = partition(list, low, high);
@@ -216,7 +247,7 @@ public class MyStack {
         }
     }
 
-    // Partition Method cho Quick Sort
+    // Partition method for Quick Sort
     private int partition(ArrayList<Student> list, int low, int high) {
         double pivot = list.get(high).getMarks();
         int i = low - 1;
@@ -234,6 +265,3 @@ public class MyStack {
         return i + 1;
     }
 }
-
-
-
